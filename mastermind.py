@@ -1,6 +1,15 @@
 import random
 
-
+"""
+fonction qui compare les dico et retourne le nombre de couleurs correctes
+et de couleurs partiellement correctes
+"""
+def compare(dico1, dico2):
+    correct = 0
+    partial = 0
+    for i in range(4):
+        if(dico1[i] == dico2[i]):
+            correct += 1
             
 
 colors = ["R", "V", "B", "J", "M", "N"]
