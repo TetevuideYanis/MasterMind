@@ -33,30 +33,84 @@ def compare(dico1, dico2, colors):
             dico2Colors[dico1[i]] -= 1
     partial -= correct
     return {"correct" : correct, "partial" : partial}
-                
-            
+           
+"""
+fonction qui ouvre un fichier et qui retourne les données en tableau
+"""     
+def readFile(f):
+    file = open(f, "r")
+    data = file.readlines()
+    data[0] = int(data[0].strip("\n"))
+    data[1] = int(data[1])
+    file.close()       
+    return data
 
+"""
+fonction qui ecrit dans un fichier
+"""
+def writeFile(f, score, nParties):
+    file = open(f, "w")
+    file.write(str(score) + "\n" + str(nParties))
+    file.close()
+
+#constantes
 colors = ["R", "V", "B", "J", "M", "N"]
-colorNumber = 4
-print('Les couleurs sont : ' + str(colors))
-code = createEmptyDico(colorNumber)
-#tire le code au hasard parmi les couleurs de la liste
-for i in range(colorNumber):
-    code[i] = random.choice(colors)
-print(code)
-
-guessStr = ""
-guessDico = createEmptyDico(colorNumber)
-tries = 0
 maxTries = 12
+colorNumber = 4
 
-while(guessDico != code and tries <= maxTries):   
-    tries += 1
-    guessStr = input("Choisir un code (XXXX)\n")
-    #transforme le string en dico
-    for i in range(colorNumber):
-        guessDico[i] = guessStr[i]
-    hint = compare(code, guessDico, colors)
-    print("Correct : " + str(hint["correct"]) + " | Partiel : " + str(hint["partial"]))
-    if(guessDico == code):
-        print("Trouvé en " + str(tries))
+#programme principal
+running = True
+while(running):
+    mode = input("Jouer(1)\nRéinitialiser les stats(2)\nQuitter(Appuyer sur n'importe quelle touche)\n")
+    
+    #mode jouer
+    if(mode == '1'):
+        play = True
+        while(play):
+            
+            #chargement des stats
+            data = readFile(".stats.txt")
+            nParties = data[0]
+            score = data[1]
+            print("Vous avez joué " + str(nParties) + " parties\nVotre score total est " + str(score))
+            
+            print('Les couleurs sont : ' + str(colors))
+            code = createEmptyDico(colorNumber)
+            #tire le code au hasard parmi les couleurs de la liste
+            for i in range(colorNumber):
+                code[i] = random.choice(colors)
+            print(code)
+            
+            guessStr = ""
+            guessDico = createEmptyDico(colorNumber)
+            tries = 0
+            
+            #jeu
+            while(guessDico != code and tries <= maxTries):   
+                tries += 1
+                guessStr = input("Choisir un code (XXXX)\n")
+                #transforme le string en dico
+                for i in range(colorNumber):
+                    guessDico[i] = guessStr[i]
+                hint = compare(code, guessDico, colors)
+                print("Correct : " + str(hint["correct"]) + " | Partiel : " + str(hint["partial"]))
+                if(guessDico == code):
+                    print("Trouvé en " + str(tries))
+            
+            #ecriture des stats
+            nParties += 1
+            score += maxTries - tries
+            writeFile(".stats.txt", nParties, score)
+            print("Vous avez joué " + str(nParties) + " parties\nVotre score total est " + str(score))
+                    
+            answer = input("Voulez vous rejouer ? o/n\n")
+            if(answer != 'o'):
+                play = False
+        
+    #mode réinitialiser
+    if(mode == '2'):
+        writeFile(".stats.txt", 0, 0)
+        
+    #quitter
+    else:
+        running = False
