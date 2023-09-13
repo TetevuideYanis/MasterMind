@@ -61,7 +61,7 @@ colorNumber = 4
 #programme principal
 running = True
 while(running):
-    mode = input("Jouer(1)\nRéinitialiser les stats(2)\nQuitter(Appuyer sur n'importe quelle touche)\n")
+    mode = input("Jouer(1)\nRéinitialiser les stats(2)\nRobot(3)\nQuitter(Appuyer sur n'importe quelle touche)\n")
     
     #mode jouer
     if(mode == '1'):
@@ -79,7 +79,6 @@ while(running):
             #tire le code au hasard parmi les couleurs de la liste
             for i in range(colorNumber):
                 code[i] = random.choice(colors)
-            print(code)
             
             guessStr = ""
             guessDico = createEmptyDico(colorNumber)
@@ -110,6 +109,21 @@ while(running):
     #mode réinitialiser
     if(mode == '2'):
         writeFile(".stats.txt", 0, 0)
+        
+    if(mode == '3'):
+        #choix du code
+        print('Les couleurs sont : ' + str(colors))
+        code = input("Choisir un code (XXXX)\n")
+        robotGuess = ""
+        tries = 0
+        #tirage aléatoire
+        while(robotGuess != code):
+            tries += 1
+            robotGuess = ""
+            for i in range(colorNumber):
+                robotGuess += random.choice(colors)
+            print(robotGuess)
+        print("Trouvé en " + str(tries) + " essais")
         
     #quitter
     else:
