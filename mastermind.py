@@ -65,46 +65,39 @@ while(running):
     
     #mode jouer
     if(mode == '1'):
-        play = True
-        while(play):
-            
-            #chargement des stats
-            data = readFile(".stats.txt")
-            nParties = data[0]
-            score = data[1]
-            print("Vous avez joué " + str(nParties) + " parties\nVotre score total est " + str(score))
-            
-            print('Les couleurs sont : ' + str(colors))
-            code = createEmptyDico(colorNumber)
-            #tire le code au hasard parmi les couleurs de la liste
+        #chargement des stats
+        data = readFile(".stats.txt")
+        nParties = data[0]
+        score = data[1]
+        print("Vous avez joué " + str(nParties) + " parties\nVotre score total est " + str(score))
+        
+        print('Les couleurs sont : ' + str(colors))
+        code = createEmptyDico(colorNumber)
+        #tire le code au hasard parmi les couleurs de la liste
+        for i in range(colorNumber):
+            code[i] = random.choice(colors)
+        
+        guessStr = ""
+        guessDico = createEmptyDico(colorNumber)
+        tries = 0
+        
+        #jeu
+        while(guessDico != code and tries < maxTries):   
+            tries += 1
+            guessStr = input("Choisir un code (XXXX)\n")
+            #transforme le string en dico
             for i in range(colorNumber):
-                code[i] = random.choice(colors)
-            
-            guessStr = ""
-            guessDico = createEmptyDico(colorNumber)
-            tries = 0
-            
-            #jeu
-            while(guessDico != code and tries <= maxTries):   
-                tries += 1
-                guessStr = input("Choisir un code (XXXX)\n")
-                #transforme le string en dico
-                for i in range(colorNumber):
-                    guessDico[i] = guessStr[i]
-                hint = compare(code, guessDico, colors)
-                print("Correct : " + str(hint["correct"]) + " | Partiel : " + str(hint["partial"]))
-                if(guessDico == code):
-                    print("Trouvé en " + str(tries))
-            
-            #ecriture des stats
-            nParties += 1
-            score += maxTries - tries
-            writeFile(".stats.txt", nParties, score)
-            print("Vous avez joué " + str(nParties) + " parties\nVotre score total est " + str(score))
-                    
-            answer = input("Voulez vous rejouer ? o/n\n")
-            if(answer != 'o'):
-                play = False
+                guessDico[i] = guessStr[i]
+            hint = compare(code, guessDico, colors)
+            print("Correct : " + str(hint["correct"]) + " | Partiel : " + str(hint["partial"]))
+            if(guessDico == code):
+                print("Trouvé en " + str(tries) + " essais")
+        
+        #ecriture des stats
+        nParties += 1
+        score += maxTries - tries
+        writeFile(".stats.txt", nParties, score)
+        print("Vous avez joué " + str(nParties) + " parties\nVotre score total est " + str(score))
         
     #mode réinitialiser
     if(mode == '2'):
@@ -114,16 +107,45 @@ while(running):
         #choix du code
         print('Les couleurs sont : ' + str(colors))
         code = input("Choisir un code (XXXX)\n")
-        robotGuess = ""
+        robotGuess = "" 
         tries = 0
+        possibility = []
+        for i in range(len(colors)):
+            for j in range(len(colors)):
+                for k in range(len(colors)):
+                    for l in range(len(colors)):
+                        possibility.append(colors[i] + colors[j] + colors[k] + colors[l])
+        possibilityCopy = possibility
         #tirage aléatoire
+        """
         while(robotGuess != code):
             tries += 1
             robotGuess = ""
             for i in range(colorNumber):
                 robotGuess += random.choice(colors)
             print(robotGuess)
-        print("Trouvé en " + str(tries) + " essais")
+        """
+        #algo de résolution
+        while(robotGuess != code):   
+            tries += 1
+            robotGuess = random.choice(possibilityCopy)
+                        
+            print("Le robot a choisit " + str(robotGuess))
+            #compare le tirage
+            hint = compare(code, robotGuess, colors)
+            scoreHint = hint["correct"] 
+            possibility = possibilityCopy
+            for i in possibility:
+                comparePossibility = compare(code, i, colors)
+                scoreComparePossibility = comparePossibility["correct"]
+                #si le score est moins bon, on supprime le mélage de la liste
+                if(scoreComparePossibility < scoreHint):
+                    possibilityCopy.remove(i)
+            
+            print("Correct : " + str(hint["correct"]) + " | Partiel : " + str(hint["partial"])) 
+            
+            if(robotGuess == code):
+                print("Trouvé en " + str(tries) + " essais")
         
     #quitter
     else:
